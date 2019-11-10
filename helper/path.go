@@ -16,5 +16,6 @@ func GetAbsPath(path string) string {
 	if err != nil {
 		return ""
 	}
+	
 	return strings.Replace(dir, "\\", "/", -1)
 }
