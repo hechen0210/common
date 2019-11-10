@@ -6,6 +6,15 @@
 */
 package helper
 
-func GetAbsPath(path string) string {
+import (
+	"path/filepath"
+	"strings"
+)
 
+func GetAbsPath(path string) string {
+	dir, err := filepath.Abs(filepath.Dir(path))
+	if err != nil {
+		return ""
+	}
+	return strings.Replace(dir, "\\", "/", -1)
 }
