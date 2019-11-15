@@ -4,4 +4,19 @@
 @File : main
 @Software: GoLand
 */
-package common
+package main
+
+import (
+	"common/config"
+	"fmt"
+)
+
+func main() {
+	c := config.Config{
+		Path: "./config",
+		File: "",
+	}
+	config, err := c.Load()
+	fmt.Println(err,config)
+	//config.Get("mysql.read")
+}

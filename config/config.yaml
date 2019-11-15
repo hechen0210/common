@@ -1,0 +1,18 @@
+mysql:
+  write:
+    host: 127.0.0.1
+    user: root
+    password: ""
+    port: "3306"
+    prefix: "ysb"
+  read:
+    host: 127.0.0.1
+    user: root
+    password: ""
+    port: "3306"
+    prefix: "ysb"
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+mongoDB: false
