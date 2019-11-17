@@ -8,87 +8,123 @@ package config
 
 import (
 	"common/helper"
-	"errors"
 	"fmt"
-	"gopkg.in/ffmt.v1"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
-type Config struct {
+type ConfigFile struct {
 	Path string
 	File string
 }
 
-type Item struct {
-	DataType string
-	Data     interface{}
+type ConfigData struct {
+	configFile string
+	data       map[string]Item
 }
-type Content map[interface{}]Item
 
-var configContent = make(map[interface{}]Item)
+var configs = ConfigData{
+	configFile: "",
+	data:       map[string]Item{},
+}
 
 /**
 加载配置文件
 */
-func (config *Config) Load() (data *map[interface{}]Item, err error) {
+func (config *ConfigFile) Load() *ConfigData {
+	var paths []string
 	if config.Path == "" {
 		config.Path = helper.GetAbsPath(os.Args[0])
 	}
+	paths = append(paths, strings.TrimSuffix(config.Path, "/"))
 	if config.File == "" {
 		config.File = "config.yaml"
 	}
-	var fullPath string
-	if strings.HasSuffix(config.Path, "/") {
-		fullPath = config.Path + config.File
-	} else {
-		fullPath = config.Path + "/" + config.File
-	}
+	paths = append(paths, config.File)
+	fullPath := strings.Join(paths, "/")
 	fileContent, err := ioutil.ReadFile(fullPath)
 	if err != nil {
-		return data, errors.New("读取配置文件失败....(" + err.Error() + ")")
+		fmt.Println("读取配置文件失败....(" + err.Error() + ")")
+		os.Exit(1)
 	}
+	configs.configFile = fullPath
 	var _content map[interface{}]interface{}
 	err = yaml.Unmarshal(fileContent, &_content)
 	if err != nil {
-		return data, errors.New("解析配置文件失败....(" + err.Error() + ")")
+		fmt.Println("解析配置文件失败....(" + err.Error() + ")")
+		os.Exit(1)
 	}
 	parse(_content, "")
-	ffmt.Print(configContent)
-	return &configContent, err
-}
-
-func parse(config map[interface{}]interface{}, prefix string) {
-	for key, item := range config {
-		dataType := reflect.TypeOf(item).String()
-		var index string
-		if prefix != "" {
-			index = prefix + "." + key.(string)
-		} else {
-			index = key.(string)
-		}
-		fmt.Println(item)
-		configContent[index] = Item{
-			DataType: dataType,
-			Data:     item,
-		}
-		switch itemType := item.(type) {
-		case map[interface{}]interface{}:
-			parse(itemType, index)
-		}
-	}
+	fmt.Println("配置文件加载完成")
+	return &configs
 }
 
 /**
-获取配置内容
+解析配置文件
 */
-func (configContent *Content) Get(key string) {
-	//	//fmt.Println(configContent)
-	//	//fields := strings.Split(key, ".")
-	//	//fmt.Println(fields)
-	//content := *configContent
-	//fmt.Println(content[fields[0]])
+func parse(config map[interface{}]interface{}, prefix string) {
+	for key, item := range config {
+		dataType := reflect.TypeOf(item).String()
+		index := setIndex(key, prefix)
+		switch data := item.(type) {
+		case map[interface{}]interface{}:
+			parse(data, index)
+		default:
+			configs.data[index] = Item{
+				DataType: dataType,
+				Data:     item,
+			}
+		}
+	}
+}
+
+func setIndex(key interface{}, prefix string) string {
+	var index string
+	if reflect.TypeOf(key).String() == "int" {
+		index = strconv.Itoa(key.(int))
+	} else {
+		index = key.(string)
+	}
+	if prefix != "" {
+		index = prefix + "." + index
+	}
+	return index
+}
+
+/**
+获取节点内容
+*/
+func (c *ConfigData) GetSection(key ...string) *Section {
+	realKey := strings.Join(key, ".")
+	data := map[string]Item{}
+	for index, item := range c.data {
+		if strings.HasPrefix(index, realKey) {
+			data[strings.TrimPrefix(index, realKey+".")] = item
+		}
+	}
+	return &Section{
+		name: realKey,
+		data: data,
+	}
+}
+
+func (c *ConfigData) Get(key ...string) *Item {
+	realKey := strings.Join(key, ".")
+	if item, exist := c.data[realKey]; exist {
+		return &item
+	} else {
+		for index, item := range c.data {
+			if strings.HasSuffix(index, "."+realKey) {
+				return &item
+			}
+		}
+	}
+	return &Item{
+		DataType: realKey,
+		Data:     nil,
+	}
 }

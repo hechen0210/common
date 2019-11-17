@@ -8,15 +8,30 @@ package main
 
 import (
 	"common/config"
+	"common/logger"
 	"fmt"
 )
 
 func main() {
-	c := config.Config{
+	c := config.ConfigFile{
 		Path: "./config",
 		File: "",
 	}
-	config, err := c.Load()
-	fmt.Println(err,config)
-	//config.Get("mysql.read")
+	data := c.Load()
+	config := data.GetSection("urls")
+	a := config.Get("inside").ToSString()
+	for key, item := range a {
+		fmt.Println(key, item)
+	}
+	log, err := logger.Log{
+		Path:     "./",
+		Dir:      "logs",
+		FileName: "log.log",
+		Rotate: logger.Rotate{
+			Period:   logger.Daily,
+			RotateBy: logger.Dir,
+		},
+		Sync:    false,
+	}.New()
+	fmt.Println(log, err)
 }
