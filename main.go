@@ -9,6 +9,7 @@ package main
 import (
 	"common/config"
 	"common/logger"
+	"common/mysql"
 	"fmt"
 )
 
@@ -23,15 +24,27 @@ func main() {
 	for key, item := range a {
 		fmt.Println(key, item)
 	}
-	log, err := logger.Log{
-		Path:     "./",
-		Dir:      "logs",
+	fileLogger, err := logger.Log{
+		Path:     "./logs",
 		FileName: "log.log",
 		Rotate: logger.Rotate{
-			Period:   logger.Daily,
-			RotateBy: logger.Dir,
+			Type:   logger.Dir,
+			Period: logger.Daily,
 		},
-		Sync:    false,
+	}.NewFileLogger()
+	fileLogger.SetBaseContent("进入结算").Write("订单号")
+	fmt.Println(fileLogger, err)
+	mc, err := mysql.Config{
+		Host:          "127.0.0.1",
+		User:          "root",
+		Password:      "",
+		Port:          "3306",
+		DbName:        "new_ysb",
+		Prefix:        "ysb_",
+		SingularTable: false,
 	}.New()
-	fmt.Println(log, err)
+	if err != nil {
+		fileLogger.SetBaseContent("").Write(err.Error())
+	}
+	fmt.Println(mc, err)
 }

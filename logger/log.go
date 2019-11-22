@@ -1,5 +1,5 @@
-/*
-@Time : 2019/11/17 2:37 上午
+/**
+@Time : 2019/11/19 10:28
 @Author : hechen
 @File : log
 @Software: GoLand
@@ -9,29 +9,40 @@ package logger
 import (
 	"common/helper"
 	"os"
-	"path"
 	"strconv"
 	"strings"
 	"time"
 )
 
 type Log struct {
-	Path        string
-	Dir         string
-	FileName    string
-	Rotate      Rotate
-	LogType     []string
-	Sync        bool
-	CurrentPath string
-	CurrentFile string
+	Path     string
+	FileName string
+	Rotate
+}
+
+type FileLogger struct {
+	path        string
+	name        string
+	baseContent string
+	rotate      Rotate
+}
+
+type MongoLogger struct {
+	DbName string
+	Rotate
+}
+
+type MysqlLogger struct {
+	DbName string
+	Rotate
 }
 
 /**
 切割周期
 */
 type Rotate struct {
-	Period   string
-	RotateBy string
+	Type   string
+	Period string
 }
 
 const (
@@ -46,115 +57,35 @@ const (
 	Warning = "Warning" //警告
 )
 
-func (l Log) New() (logger *Log, err error) {
-	if err = l.setPath(); err != nil {
-		return nil, err
-	}
-	if err = l.setFile(); err != nil {
-		return nil, err
-	}
-	return &l, nil
-}
-
-func (l *Log) AddLogType(logType string) (logger *Log, err error) {
-	l.LogType = append(l.LogType, logType)
-	return l, l.setFile()
-}
-
 /**
-检查路径,不存在则创建
+新日志文件
 */
-func (l *Log) setPath() error {
+func (l Log) NewFileLogger() (logger *FileLogger, err error) {
 	var paths []string
+	var _logger FileLogger
 	if l.Path == "" {
 		l.Path = helper.GetAbsPath(os.Args[0])
 	}
 	paths = append(paths, strings.TrimSuffix(l.Path, "/"))
-	if l.Dir == "" {
-		l.Dir = "logs"
-	}
-	paths = append(paths, strings.Trim(l.Dir, "/"))
-	if l.Rotate.RotateBy == Dir {
-		paths = append(paths, l.getRotate())
-	}
-	fullPath := strings.Join(paths, "/")
-	if !helper.PathExist(fullPath) {
-		return os.MkdirAll(fullPath, 0755)
-	}
-	l.CurrentPath = fullPath
-	return nil
-}
-
-/**
-设置文件
-*/
-func (l *Log) setFile() (err error) {
-	var fileName []string
-	if l.FileName == "" {
-		l.FileName = "log.log"
-	}
-	fileExt := path.Ext(l.FileName)
-	fileName = append(fileName, strings.TrimSuffix(l.FileName, fileExt))
-	if l.LogType == nil {
-		l.LogType = append(l.LogType, Info, Errors, Warning)
-	}
-	if l.Rotate.RotateBy == File {
-		fileName = append(fileName, l.getRotate())
-	}
-	fileNameLen := len(fileName)
-	var fullName string
-	for _, item := range l.LogType {
-		if fileNameLen == 1 {
-			fullName = strings.Join([]string{fileName[0], item}, "_")
-		} else {
-			fullName = strings.Join([]string{fileName[0], item, fileName[1]}, "_")
-		}
-		fullName = fullName + fileExt
-		if err = createFile(l.CurrentPath + "/" + fullName); err != nil {
-			return err
-		}
-	}
-	return nil
+	_logger.path = strings.Join(paths, "/")
+	_logger.name = l.FileName
+	_logger.rotate = l.Rotate
+	//写入初始化
+	_logger.Write("======日志初始化完成======")
+	return &_logger, nil
 }
 
 /**
 按周期切割
 */
-func (l *Log) getRotate() string {
-	if l.Rotate.Period == Weekly {
-		_, week := time.Now().ISOWeek()
-		return strconv.Itoa(week)
-	} else if l.Rotate.Period == Monthly {
+func (r *Rotate) getRotate() string {
+	if r.Period == Weekly {
+		year, week := time.Now().ISOWeek()
+		return strconv.Itoa(year) + strconv.Itoa(week)
+	} else if r.Period == Monthly {
 		return time.Now().Format("200601")
-	} else if l.Rotate.Period == Yearly {
+	} else if r.Period == Yearly {
 		return time.Now().Format("2006")
 	}
 	return time.Now().Format("20060102")
-}
-
-/**
-创建日志文件
-*/
-func createFile(filePath string) error {
-	if !helper.FileExist(filePath) {
-		file, err := os.Create(filePath)
-		err = file.Close()
-		return err
-	}
-	return nil
-}
-
-/**
-切割文件
-*/
-func (l *Log) rotateLog() error {
-	if l.Rotate.RotateBy == Dir {
-		if err := l.setPath(); err != nil {
-			return err
-		}
-	}
-	if err := l.setFile(); err != nil {
-		return err
-	}
-	return nil
 }
