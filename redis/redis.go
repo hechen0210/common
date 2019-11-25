@@ -19,13 +19,13 @@ type Redis struct {
 	Error  error
 }
 
-func (c Config) New() Redis {
+func (c Config) New() *Redis {
 	client := redis.NewClient(&redis.Options{
 		Addr:     c.Host + ":" + c.Port,
 		Password: c.Auth,
 	})
 	_, err := client.Ping().Result()
-	return Redis{
+	return &Redis{
 		client: client,
 		Error:  err,
 	}
