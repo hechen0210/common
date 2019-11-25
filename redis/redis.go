@@ -14,11 +14,19 @@ type Config struct {
 	Auth string
 }
 
-func (c Config) New() (client *redis.Client, err error) {
-	client = redis.NewClient(&redis.Options{
+type Redis struct {
+	client *redis.Client
+	Error  error
+}
+
+func (c Config) New() Redis {
+	client := redis.NewClient(&redis.Options{
 		Addr:     c.Host + ":" + c.Port,
 		Password: c.Auth,
 	})
-	_, err = client.Ping().Result()
-	return client, err
+	_, err := client.Ping().Result()
+	return Redis{
+		client: client,
+		Error:  err,
+	}
 }

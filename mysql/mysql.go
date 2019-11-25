@@ -7,9 +7,9 @@
 package mysql
 
 import (
-	"common/helper"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/hechen0210/common/helper"
 	"github.com/jinzhu/gorm"
 	"strings"
 	"time"
@@ -26,21 +26,24 @@ type Config struct {
 }
 
 type DB struct {
-	Db    *gorm.DB
-	Error error
+	Client *gorm.DB
+	Error  error
 }
 
-func (c Config) New() (db DB) {
+func (c Config) New() *DB {
 	connectStr := "%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local"
 	connect := fmt.Sprintf(connectStr, c.User, c.Password, c.Host, c.Port, c.DbName)
-	db.Db, db.Error = gorm.Open("mysql", connect)
-	if db.Error != nil {
-		return db
+	db, err := gorm.Open("mysql", connect)
+	if err != nil {
+		return &DB{
+			Client: db,
+			Error:  err,
+		}
 	}
-	db.Db.SingularTable(c.SingularTable)
-	db.Db.DB().SetConnMaxLifetime(time.Hour * 4)
-	db.Db.DB().SetMaxIdleConns(10)
-	db.Db.DB().SetMaxIdleConns(100)
+	db.SingularTable(c.SingularTable)
+	db.DB().SetConnMaxLifetime(time.Hour * 4)
+	db.DB().SetMaxIdleConns(10)
+	db.DB().SetMaxIdleConns(100)
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
 		if strings.HasPrefix(defaultTableName, c.Prefix) {
 			return defaultTableName
@@ -48,7 +51,10 @@ func (c Config) New() (db DB) {
 		return c.Prefix + defaultTableName
 	}
 
-	return db
+	return &DB{
+		Client: db,
+		Error:  err,
+	}
 }
 
 /**
@@ -72,6 +78,6 @@ func (db DB) BatchInsert(tableName string, field []string, data [][]string) {
 		}
 	}
 	if len(values) > 0 {
-		db.Db.Exec(insert, values...)
+		db.Client.Exec(insert, values...)
 	}
 }
