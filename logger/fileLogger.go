@@ -8,6 +8,7 @@ package logger
 
 import (
 	"common/helper"
+	"fmt"
 	"log"
 	"os"
 	"path"
@@ -19,8 +20,14 @@ func (l *FileLogger) SetBaseContent(content string) *FileLogger {
 	return l
 }
 
+func (l *FileLogger) Print() *FileLogger {
+	fmt.Println(l.LogContent)
+	return l
+}
+
 func (l *FileLogger) Write(content string) *FileLogger {
-	write(l.getLogfile(), l.baseContent+" "+content)
+	l.LogContent = l.baseContent + " " + content
+	write(l.getLogfile(), l.LogContent)
 	return l
 }
 

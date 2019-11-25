@@ -25,6 +25,7 @@ type FileLogger struct {
 	name        string
 	baseContent string
 	rotate      Rotate
+	LogContent  string
 }
 
 type MongoLogger struct {

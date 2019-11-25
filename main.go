@@ -32,12 +32,12 @@ func main() {
 			Period: logger.Daily,
 		},
 	}.NewFileLogger()
-	fileLogger.SetBaseContent("进入结算").Write("订单号")
-	fmt.Println(fileLogger, err)
-	mc, err := mysql.Config{
-		Host:          "127.0.0.1",
+	fileLogger.SetBaseContent("进入结算").Write("订单号").Print()
+	fileLogger.Write("aiyaya")
+	mc := mysql.Config{
+		Host:          "192.168.0.235",
 		User:          "root",
-		Password:      "",
+		Password:      "ysb123456",
 		Port:          "3306",
 		DbName:        "new_ysb",
 		Prefix:        "ysb_",
@@ -46,5 +46,7 @@ func main() {
 	if err != nil {
 		fileLogger.SetBaseContent("").Write(err.Error())
 	}
-	fmt.Println(mc, err)
+	var cc []string
+	r := mc.Db.Raw("select * from ysb_users12").Scan(&cc)
+	fmt.Println(r.Error)
 }
