@@ -1,4 +1,4 @@
-module common
+module github.com/hechen0210/common
 
 go 1.12
 
