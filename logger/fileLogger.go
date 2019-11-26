@@ -7,8 +7,8 @@
 package logger
 
 import (
-	"common/helper"
 	"fmt"
+	"github.com/hechen0210/common/helper"
 	"log"
 	"os"
 	"path"

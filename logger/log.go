@@ -7,7 +7,7 @@
 package logger
 
 import (
-	"common/helper"
+	"github.com/hechen0210/common/helper"
 	"os"
 	"strconv"
 	"strings"
