@@ -78,7 +78,8 @@ func getFileName(fileName string, rotate string) (fullName string) {
 */
 func createDir(fullPath string) string {
 	if !helper.PathExist(fullPath) {
-		_ = os.MkdirAll(fullPath, 0755)
+		err := os.MkdirAll(fullPath, 0755)
+		fmt.Println(err)
 	}
 	return fullPath
 }
@@ -88,7 +89,8 @@ func createDir(fullPath string) string {
 */
 func createFile(filePath string) string {
 	if !helper.FileExist(filePath) {
-		file, _ := os.Create(filePath)
+		file, err := os.Create(filePath)
+		fmt.Println(err)
 		_ = file.Close()
 	}
 	return filePath
