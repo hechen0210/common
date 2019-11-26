@@ -7,7 +7,7 @@
 package config
 
 import (
-	"common/helper"
+	"github.com/hechen0210/common/helper"
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
