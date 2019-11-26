@@ -40,7 +40,7 @@ func (c Config) New() *MQ {
 			Error:  err,
 		}
 	}
-	err = client.ExchangeDeclare(c.Exchange, amqp.ExchangeDirect, false, false, false, false, nil)
+	err = client.ExchangeDeclare(c.Exchange, amqp.ExchangeDirect, true, false, false, false, nil)
 	return &MQ{
 		Client: client,
 		Error:  err,
