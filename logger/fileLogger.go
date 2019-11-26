@@ -39,7 +39,7 @@ func (l *FileLogger) getLogfile() string {
 		filePath = getDir(l.path, rotate)
 		fileName = l.name
 	} else {
-		filePath = l.path
+		filePath = getDir(l.path, "")
 		fileName = getFileName(l.name, rotate)
 	}
 	return createFile(filePath + "/" + fileName)
@@ -78,8 +78,7 @@ func getFileName(fileName string, rotate string) (fullName string) {
 */
 func createDir(fullPath string) string {
 	if !helper.PathExist(fullPath) {
-		err := os.MkdirAll(fullPath, 0755)
-		fmt.Println(err)
+		_ = os.MkdirAll(fullPath, 0755)
 	}
 	return fullPath
 }
@@ -89,8 +88,7 @@ func createDir(fullPath string) string {
 */
 func createFile(filePath string) string {
 	if !helper.FileExist(filePath) {
-		file, err := os.Create(filePath)
-		fmt.Println(err)
+		file, _ := os.Create(filePath)
 		_ = file.Close()
 	}
 	return filePath
