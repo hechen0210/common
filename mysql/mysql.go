@@ -45,6 +45,8 @@ func (c Config) New() *DB {
 	db.DB().SetMaxIdleConns(10)
 	db.DB().SetMaxIdleConns(100)
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
+		fmt.Println(c.Prefix)
+		fmt.Println(defaultTableName)
 		if strings.HasPrefix(defaultTableName, c.Prefix) {
 			return defaultTableName
 		}
