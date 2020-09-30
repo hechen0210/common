@@ -7,8 +7,8 @@
 package config
 
 import (
-	"github.com/hechen0210/common/helper"
 	"fmt"
+	"github.com/hechen0210/common/helper"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
@@ -38,7 +38,7 @@ var configs = ConfigData{
 func (config *ConfigFile) Load() *ConfigData {
 	var paths []string
 	if config.Path == "" {
-		config.Path = helper.GetAbsPath(os.Args[0])
+		config.Path = helper.GetAbsPath()
 	}
 	paths = append(paths, strings.TrimSuffix(config.Path, "/"))
 	if config.File == "" {

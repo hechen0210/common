@@ -15,12 +15,13 @@ import (
 /**
 获取路径绝对地址
 */
-func GetAbsPath(path string) string {
-	dir, err := filepath.Abs(filepath.Dir(path))
+func GetAbsPath() string {
+	dir, err := os.Executable()
 	if err != nil {
 		return ""
 	}
-	return strings.Replace(dir, "\\", "/", -1)
+	path := filepath.Dir(dir)
+	return strings.Replace(path, "\\", "/", -1)
 }
 
 /**
