@@ -15,7 +15,7 @@ type Config struct {
 }
 
 type Redis struct {
-	client *redis.Client
+	Client *redis.Client
 	Error  error
 }
 
@@ -26,7 +26,7 @@ func (c Config) New() *Redis {
 	})
 	_, err := client.Ping().Result()
 	return &Redis{
-		client: client,
+		Client: client,
 		Error:  err,
 	}
 }
