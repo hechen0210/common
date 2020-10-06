@@ -39,7 +39,7 @@ func (c Config) New() *Mongo {
 		}
 	}
 	return &Mongo{
-		Client: nil,
+		Client: client,
 		Error:  nil,
 	}
 }
