@@ -60,7 +60,7 @@ func (c Config) New() *DB {
 /**
 批量插入
 */
-func (db DB) BatchInsert(tableName string, field []string, data [][]string) {
+func (db *DB) BatchInsert(tableName string, field []string, data [][]string) {
 	insert := "insert into " + tableName + "(" + strings.Join(field, ",") + ") values "
 	fieldLen := len(field)
 	for i := 0; i < fieldLen; i++ {
