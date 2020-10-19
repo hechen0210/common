@@ -7,6 +7,7 @@
 package mysql
 
 import (
+	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hechen0210/common/helper"
@@ -60,7 +61,7 @@ func (c Config) New() *DB {
 /**
 批量插入
 */
-func (db *DB) BatchInsert(tableName string, field []string, data [][]interface{}) {
+func (db *DB) BatchInsert(tableName string, field []string, data [][]interface{}) error {
 	insert := "insert into " + tableName + "(" + strings.Join(field, ",") + ") values "
 	fieldLen := len(field)
 	for i := 0; i < fieldLen; i++ {
@@ -78,6 +79,7 @@ func (db *DB) BatchInsert(tableName string, field []string, data [][]interface{}
 		}
 	}
 	if len(values) > 0 {
-		db.Client.Exec(insert, values...)
+		return db.Client.Exec(insert, values...).Error
 	}
+	return errors.New("data is empty")
 }
