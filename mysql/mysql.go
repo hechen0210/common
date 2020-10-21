@@ -64,14 +64,14 @@ func (c Config) New() *DB {
 func (db *DB) BatchInsert(tableName string, field []string, data [][]interface{}) error {
 	insert := "insert into " + tableName + "(" + strings.Join(field, ",") + ") values "
 	fieldLen := len(field)
-	for i := 0; i < fieldLen; i++ {
+	dataLen := len(data)
+	for i := 0; i < len(data); i++ {
 		insert += "("
-		insert += strings.Repeat("?,", len(field))
+		insert += strings.Repeat("?,", fieldLen)
 		insert = helper.SubStrByEnd(insert, 0, -1)
 		insert += "),"
 	}
 	insert = helper.SubStrByEnd(insert, 0, -1)
-	dataLen := len(data)
 	values := []interface{}{}
 	for i := 0; i < dataLen; i++ {
 		if len(data[i]) == fieldLen {
