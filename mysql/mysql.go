@@ -78,9 +78,8 @@ func (db *DB) BatchInsert(tableName string, field []string, data [][]interface{}
 			values = append(values, data[i]...)
 		}
 	}
-	fmt.Println(values)
 	if len(values) > 0 {
-		return db.Client.Debug().Exec(insert, values...).Error
+		return db.Client.Exec(insert, values...).Error
 	}
 	return errors.New("data is empty")
 }
