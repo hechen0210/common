@@ -75,7 +75,7 @@ func (db *DB) BatchInsert(tableName string, field []string, data [][]interface{}
 	values := []interface{}{}
 	for i := 0; i < dataLen; i++ {
 		if len(data[i]) == fieldLen {
-			values = append(values, data[i])
+			values = append(values, data[i]...)
 		}
 	}
 	fmt.Println(values)
