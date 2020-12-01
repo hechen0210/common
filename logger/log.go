@@ -8,7 +8,6 @@ package logger
 
 import (
 	"github.com/hechen0210/common/helper"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -65,7 +64,7 @@ func (l Log) NewFileLogger() (logger *FileLogger, err error) {
 	var paths []string
 	var _logger FileLogger
 	if l.Path == "" {
-		l.Path = helper.GetAbsPath(os.Args[0])
+		l.Path = helper.GetAbsPath()
 	}
 	paths = append(paths, strings.TrimSuffix(l.Path, "/"))
 	_logger.path = strings.Join(paths, "/")
