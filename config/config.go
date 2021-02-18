@@ -27,9 +27,20 @@ type ConfigData struct {
 	data       map[string]Item
 }
 
-var configs = ConfigData{
-	configFile: "",
-	data:       map[string]Item{},
+/**
+解析配置文件
+ */
+func ParseFile(fileName string) *ConfigFile {
+	if fileName == "" {
+		fmt.Println("配置文件不能为空")
+		os.Exit(1)
+	}
+	var parseFile = strings.Split(fileName, "/")
+	parseFileLen := len(parseFile)
+	return &ConfigFile{
+		Path: strings.Join(parseFile[0:parseFileLen-1], "/"),
+		File: parseFile[parseFileLen-1],
+	}
 }
 
 /**
@@ -51,14 +62,17 @@ func (config *ConfigFile) Load() *ConfigData {
 		fmt.Println("读取配置文件失败....(" + err.Error() + ")")
 		os.Exit(1)
 	}
-	configs.configFile = fullPath
-	var _content map[interface{}]interface{}
-	err = yaml.Unmarshal(fileContent, &_content)
+	var configs = ConfigData{
+		configFile: fullPath,
+		data:       map[string]Item{},
+	}
+	var content map[interface{}]interface{}
+	err = yaml.Unmarshal(fileContent, &content)
 	if err != nil {
 		fmt.Println("解析配置文件失败....(" + err.Error() + ")")
 		os.Exit(1)
 	}
-	parse(_content, "")
+	configs.parse(content, "")
 	fmt.Println("配置文件加载完成")
 	return &configs
 }
@@ -66,15 +80,15 @@ func (config *ConfigFile) Load() *ConfigData {
 /**
 解析配置文件
 */
-func parse(config map[interface{}]interface{}, prefix string) {
-	for key, item := range config {
+func (c *ConfigData)parse(content map[interface{}]interface{}, prefix string) {
+	for key, item := range content {
 		dataType := reflect.TypeOf(item).String()
 		index := setIndex(key, prefix)
 		switch data := item.(type) {
 		case map[interface{}]interface{}:
-			parse(data, index)
+			c.parse(data, index)
 		default:
-			configs.data[index] = Item{
+			c.data[index] = Item{
 				DataType: dataType,
 				Data:     item,
 			}
