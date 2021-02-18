@@ -44,35 +44,13 @@ type ConfigData struct {
 
 var UseType = []string{"file", "env", "chiefByFile", "chiefByEnv"}
 
-/**
-解析配置文件
-*/
-func (c *Config) ParseFile() *ConfigFile {
-	if c.FileName == "" {
-		fmt.Println("配置文件不能为空")
-		os.Exit(1)
-	}
-	var parseFile = strings.Split(c.FileName, "/")
-	parseFileLen := len(parseFile)
-	if parseFileLen == 1 {
-		return &ConfigFile{
-			Path: "",
-			File: parseFile[parseFileLen-1],
-		}
-	}
-	return &ConfigFile{
-		Path: strings.Join(parseFile[0:parseFileLen-1], "/"),
-		File: parseFile[parseFileLen-1],
-	}
-}
-
 /*
 Load 加载配置文件
 @param readEnv 读取环境变量，如果为true，优先读取环境变量
 @param envPrefix 环境变量前缀
 @param ignorePrefix 忽略环境变量前缀
 */
-func (config *Config) Load() *ConfigData {
+func Load(config *Config) *ConfigData {
 	if !helper.Contains(UseType, config.Use) {
 		fmt.Println("use 类型错误,只能使用file,env,chiefByFile,chiefByEnv")
 		os.Exit(1)
@@ -98,6 +76,28 @@ func (config *Config) Load() *ConfigData {
 	}
 	configData.data = data
 	return &configData
+}
+
+/**
+解析配置文件
+*/
+func (c *Config) ParseFile() *ConfigFile {
+	if c.FileName == "" {
+		fmt.Println("配置文件不能为空")
+		os.Exit(1)
+	}
+	var parseFile = strings.Split(c.FileName, "/")
+	parseFileLen := len(parseFile)
+	if parseFileLen == 1 {
+		return &ConfigFile{
+			Path: "",
+			File: parseFile[parseFileLen-1],
+		}
+	}
+	return &ConfigFile{
+		Path: strings.Join(parseFile[0:parseFileLen-1], "/"),
+		File: parseFile[parseFileLen-1],
+	}
 }
 
 /*
