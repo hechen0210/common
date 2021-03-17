@@ -109,7 +109,6 @@ func (c *Config) loadByEnv() *ConfigData {
 	for _, item := range env {
 		_env := strings.Split(item, "=")
 		key := _env[0]
-		fmt.Println(key)
 		value := _env[1]
 		valueType := reflect.TypeOf(value).String()
 		if c.Env.Prefix != "" {
