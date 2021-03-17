@@ -8,13 +8,14 @@ package config
 
 import (
 	"fmt"
-	"github.com/hechen0210/common/helper"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/hechen0210/common/helper"
+	"gopkg.in/yaml.v2"
 )
 
 /*
@@ -116,7 +117,7 @@ func (c *Config) loadByEnv() *ConfigData {
 				if c.Env.IgnorePrefix {
 					key = strings.TrimPrefix(key, c.Env.Prefix+"_")
 				}
-			}else{
+			} else {
 				continue
 			}
 		}
@@ -135,8 +136,8 @@ func (c *Config) loadByEnv() *ConfigData {
 /*
 loadByFile 从文件加载配置
 */
-func (config *Config) loadByFile() *ConfigData {
-	configFile := config.ParseFile()
+func (c *Config) loadByFile() *ConfigData {
+	configFile := c.ParseFile()
 	fullPath := configFile.getFilePath()
 	fileContent, err := ioutil.ReadFile(fullPath)
 	if err != nil {
@@ -175,8 +176,8 @@ func (c *ConfigFile) getFilePath() string {
 	return fullPath
 }
 
-/**
-解析配置文件
+/*
+pase 解析配置文件
 */
 func (c *ConfigData) parse(content map[interface{}]interface{}, prefix string) {
 	for key, item := range content {
@@ -207,8 +208,8 @@ func setIndex(key interface{}, prefix string) string {
 	return index
 }
 
-/**
-获取节点内容
+/*
+GetSection 获取节点内容
 */
 func (c *ConfigData) GetSection(key ...string) *Section {
 	realKey := strings.Join(key, ".")
@@ -224,6 +225,9 @@ func (c *ConfigData) GetSection(key ...string) *Section {
 	}
 }
 
+/*
+Get 获取配置值
+*/
 func (c *ConfigData) Get(key ...string) *Item {
 	realKey := strings.Join(key, ".")
 	if item, exist := c.data[realKey]; exist {
