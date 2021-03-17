@@ -108,24 +108,23 @@ func (c *Config) loadByEnv() *ConfigData {
 	env := os.Environ()
 	for _, item := range env {
 		_env := strings.Split(item, "=")
-		key := strings.Replace(_env[0], "_", ".", -1)
+		key := _env[0]
+		fmt.Println(key)
 		value := _env[1]
 		valueType := reflect.TypeOf(value).String()
 		if c.Env.Prefix != "" {
 			if strings.HasPrefix(key, c.Env.Prefix) {
 				if c.Env.IgnorePrefix {
-					key = strings.TrimPrefix(key, c.Env.Prefix)
+					key = strings.TrimPrefix(key, c.Env.Prefix+"_")
 				}
-				configData[key] = Item{
-					DataType: valueType,
-					Data:     value,
-				}
+			}else{
+				continue
 			}
-		} else {
-			configData[key] = Item{
-				DataType: valueType,
-				Data:     value,
-			}
+		}
+		key = strings.Replace(key, "_", ".", -1)
+		configData[key] = Item{
+			DataType: valueType,
+			Data:     value,
 		}
 	}
 	return &ConfigData{
