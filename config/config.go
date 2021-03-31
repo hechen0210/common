@@ -7,6 +7,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -51,18 +52,24 @@ Load 加载配置文件
 @param envPrefix 环境变量前缀
 @param ignorePrefix 忽略环境变量前缀
 */
-func Load(config *Config) *ConfigData {
+func Load(config *Config) (*ConfigData, error) {
 	if !helper.Contains(UseType, config.Use) {
 		fmt.Println("use 类型错误,只能使用file,env,chiefByFile,chiefByEnv")
 		os.Exit(1)
 	}
 	envData := config.loadByEnv()
 	if config.Use == "env" {
-		return envData
+		if len(envData.data) == 0 {
+			return nil, errors.New("配置为空")
+		}
+		return envData, nil
 	}
-	fileData := config.loadByFile()
+	fileData, err := config.loadByFile()
 	if config.Use == "file" {
-		return fileData
+		if err != nil {
+			return nil, err
+		}
+		return fileData, nil
 	}
 	configData := ConfigData{configFile: fileData.configFile}
 	data := fileData.data
@@ -75,17 +82,19 @@ func Load(config *Config) *ConfigData {
 			data[key] = item
 		}
 	}
+	if len(data) == 0 {
+		return nil, errors.New("配置为空")
+	}
 	configData.data = data
-	return &configData
+	return &configData, nil
 }
 
 /**
 解析配置文件
 */
-func (c *Config) ParseFile() *ConfigFile {
+func (c *Config) ParseFile() (*ConfigFile, error) {
 	if c.FileName == "" {
-		fmt.Println("配置文件不能为空")
-		os.Exit(1)
+		return nil, errors.New("配置文件不能为空")
 	}
 	var parseFile = strings.Split(c.FileName, "/")
 	parseFileLen := len(parseFile)
@@ -93,12 +102,12 @@ func (c *Config) ParseFile() *ConfigFile {
 		return &ConfigFile{
 			Path: "",
 			File: parseFile[parseFileLen-1],
-		}
+		}, nil
 	}
 	return &ConfigFile{
 		Path: strings.Join(parseFile[0:parseFileLen-1], "/"),
 		File: parseFile[parseFileLen-1],
-	}
+	}, nil
 }
 
 /*
@@ -136,13 +145,15 @@ func (c *Config) loadByEnv() *ConfigData {
 /*
 loadByFile 从文件加载配置
 */
-func (c *Config) loadByFile() *ConfigData {
-	configFile := c.ParseFile()
+func (c *Config) loadByFile() (*ConfigData, error) {
+	configFile, err := c.ParseFile()
+	if err != nil {
+		return nil, err
+	}
 	fullPath := configFile.getFilePath()
 	fileContent, err := ioutil.ReadFile(fullPath)
 	if err != nil {
-		fmt.Println("读取配置文件失败....(" + err.Error() + ")")
-		os.Exit(1)
+		return nil, errors.New("读取配置文件失败....(" + err.Error() + ")")
 	}
 	var configs = ConfigData{
 		configFile: fullPath,
@@ -151,12 +162,10 @@ func (c *Config) loadByFile() *ConfigData {
 	var content map[interface{}]interface{}
 	err = yaml.Unmarshal(fileContent, &content)
 	if err != nil {
-		fmt.Println("解析配置文件失败....(" + err.Error() + ")")
-		os.Exit(1)
+		return nil, errors.New("解析配置文件失败....(" + err.Error() + ")")
 	}
 	configs.parse(content, "")
-	fmt.Println("配置文件加载完成")
-	return &configs
+	return &configs, nil
 }
 
 /*
