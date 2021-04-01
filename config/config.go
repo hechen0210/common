@@ -235,7 +235,7 @@ func (c *ConfigData) GetSection(key ...string) *Section {
 }
 
 /*
-Get 获取配置值
+Get 获取配置值˜
 */
 func (c *ConfigData) Get(key ...string) *Item {
 	realKey := strings.Join(key, ".")

@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	Config := config.Load(&config.Config{
+	Config,err := config.Load(&config.Config{
 		FileName: "./config/config.yaml",
 		Use:      "env",
 		Env: config.Env{
@@ -29,6 +29,7 @@ func main() {
 			IgnorePrefix: true,
 		},
 	})
+	fmt.Println(err)
 	fmt.Println(Config)
 	//c := config.ConfigFile{
 	//	Path: "./config",
