@@ -24,6 +24,7 @@ type Config struct {
 	DbName        string
 	Prefix        string
 	SingularTable bool
+	Charset       string
 }
 
 type DB struct {
@@ -32,8 +33,12 @@ type DB struct {
 }
 
 func (c Config) New() *DB {
-	connectStr := "%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local"
-	connect := fmt.Sprintf(connectStr, c.User, c.Password, c.Host, c.Port, c.DbName)
+	charset := "utf8"
+	if c.Charset != "" {
+		charset = c.Charset
+	}
+	connectStr := "%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=Local"
+	connect := fmt.Sprintf(connectStr, c.User, c.Password, c.Host, c.Port, c.DbName, charset)
 	db, err := gorm.Open("mysql", connect)
 	if err != nil {
 		return &DB{
