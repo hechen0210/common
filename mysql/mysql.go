@@ -31,8 +31,10 @@ type DB struct {
 	Client *gorm.DB
 	Error  error
 }
-
-func (c Config) New() *DB {
+/*
+New 创建mysql连接
+*/
+func (c *Config) New() *DB {
 	charset := "utf8"
 	if c.Charset != "" {
 		charset = c.Charset
