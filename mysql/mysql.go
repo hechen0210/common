@@ -32,6 +32,10 @@ type DB struct {
 	Error  error
 }
 
+type MultiDB struct {
+	DBs map[string]*DB
+}
+
 var DBPrefix = make(map[string]string)
 
 /*
@@ -60,13 +64,26 @@ func (c *Config) New() *DB {
 		if strings.HasPrefix(defaultTableName, DBPrefix[c.DbName]) {
 			return defaultTableName
 		}
-		return  DBPrefix[c.DbName] + defaultTableName
+		return DBPrefix[c.DbName] + defaultTableName
 	}
 
 	return &DB{
 		Client: db,
 		Error:  err,
 	}
+}
+
+/*
+GetClient 获取DB客户端
+*/
+func (d *MultiDB) GetClient(dbName string) *gorm.DB {
+	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
+		if strings.HasPrefix(defaultTableName, DBPrefix[dbName]) {
+			return defaultTableName
+		}
+		return DBPrefix[dbName] + defaultTableName
+	}
+	return d.DBs[dbName].Client
 }
 
 /**
