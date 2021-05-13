@@ -31,6 +31,9 @@ type DB struct {
 	Client *gorm.DB
 	Error  error
 }
+
+var DBPrefix = make(map[string]string)
+
 /*
 New 创建mysql连接
 */
@@ -48,15 +51,16 @@ func (c *Config) New() *DB {
 			Error:  err,
 		}
 	}
+	DBPrefix[c.DbName] = c.Prefix
 	db.SingularTable(c.SingularTable)
 	db.DB().SetConnMaxLifetime(time.Hour * 4)
 	db.DB().SetMaxIdleConns(10)
 	db.DB().SetMaxIdleConns(100)
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
-		if strings.HasPrefix(defaultTableName, c.Prefix) {
+		if strings.HasPrefix(defaultTableName, DBPrefix[c.DbName]) {
 			return defaultTableName
 		}
-		return c.Prefix + defaultTableName
+		return  DBPrefix[c.DbName] + defaultTableName
 	}
 
 	return &DB{
