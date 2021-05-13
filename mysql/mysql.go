@@ -86,6 +86,19 @@ func (d *MultiDB) GetClient(dbName string) *gorm.DB {
 	return d.DBs[dbName].Client
 }
 
+/*
+GetFullClient 获取完整客户端
+*/
+func (d *MultiDB) GetFullClient(dbName string) *DB {
+	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
+		if strings.HasPrefix(defaultTableName, DBPrefix[dbName]) {
+			return defaultTableName
+		}
+		return DBPrefix[dbName] + defaultTableName
+	}
+	return d.DBs[dbName]
+}
+
 /**
 批量插入
 */
