@@ -218,6 +218,13 @@ func setIndex(key interface{}, prefix string) string {
 }
 
 /*
+GetAllConfig 获取所有配置内容
+*/
+func (c *ConfigData) GetAllConfig() map[string]Item {
+	return c.data
+}
+
+/*
 GetSection 获取节点内容
 */
 func (c *ConfigData) GetSection(key ...string) *Section {
