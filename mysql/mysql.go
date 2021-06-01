@@ -24,6 +24,7 @@ type Config struct {
 	DbName        string
 	Prefix        string
 	SingularTable bool
+	Charset       string
 }
 
 type DB struct {
@@ -31,9 +32,22 @@ type DB struct {
 	Error  error
 }
 
-func (c Config) New() *DB {
-	connectStr := "%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local"
-	connect := fmt.Sprintf(connectStr, c.User, c.Password, c.Host, c.Port, c.DbName)
+type MultiDB struct {
+	DBs map[string]*DB
+}
+
+var DBPrefix = make(map[string]string)
+
+/*
+New 创建mysql连接
+*/
+func (c *Config) New() *DB {
+	charset := "utf8"
+	if c.Charset != "" {
+		charset = c.Charset
+	}
+	connectStr := "%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=Local"
+	connect := fmt.Sprintf(connectStr, c.User, c.Password, c.Host, c.Port, c.DbName, charset)
 	db, err := gorm.Open("mysql", connect)
 	if err != nil {
 		return &DB{
@@ -41,21 +55,48 @@ func (c Config) New() *DB {
 			Error:  err,
 		}
 	}
+	DBPrefix[c.DbName] = c.Prefix
 	db.SingularTable(c.SingularTable)
 	db.DB().SetConnMaxLifetime(time.Hour * 4)
 	db.DB().SetMaxIdleConns(10)
 	db.DB().SetMaxIdleConns(100)
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
-		if strings.HasPrefix(defaultTableName, c.Prefix) {
+		if strings.HasPrefix(defaultTableName, DBPrefix[c.DbName]) {
 			return defaultTableName
 		}
-		return c.Prefix + defaultTableName
+		return DBPrefix[c.DbName] + defaultTableName
 	}
 
 	return &DB{
 		Client: db,
 		Error:  err,
 	}
+}
+
+/*
+GetClient 获取DB客户端
+*/
+func (d *MultiDB) GetClient(dbName string) *gorm.DB {
+	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
+		if strings.HasPrefix(defaultTableName, DBPrefix[dbName]) {
+			return defaultTableName
+		}
+		return DBPrefix[dbName] + defaultTableName
+	}
+	return d.DBs[dbName].Client
+}
+
+/*
+GetFullClient 获取完整客户端
+*/
+func (d *MultiDB) GetFullClient(dbName string) *DB {
+	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
+		if strings.HasPrefix(defaultTableName, DBPrefix[dbName]) {
+			return defaultTableName
+		}
+		return DBPrefix[dbName] + defaultTableName
+	}
+	return d.DBs[dbName]
 }
 
 /**
